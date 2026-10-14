@@ -3,25 +3,30 @@
 namespace App\Builders;
 
 use App\Models\ProductReview;
+use App\Models\ProductSupplier;
 use Illuminate\Database\Eloquent\Builder;
 
 final class ProductBuilder extends Builder
 {
     public function filterName(string $name): static
     {
-        return $this->when($name !== '', function($query, string $name) {
-            $query->whereLike('name', "%{$name}%");
+        return $this->when($name !== '', function($query) use($name) {
+            $query->orWhereLike('name', "%{$name}%");
         });
     }
 
     public function filterDescription(string $description): static
     {
-        return $this->whereLike('description', "%{$description}%");
+        return $this->when($description !== '', function($query) use($description) {
+            $query->orWhereLike('description', "%{$description}%");
+        });
     }
 
-    public function filterCategory(array $categoryIds): static
+    public function filterCategory(int $categoryId): static
     {
-        return $this->whereIn('category_id', $categoryIds);
+        return $this->when($categoryId > 0, function($query) use($categoryId) {
+            $query->where('category_id', $categoryId);
+        });
     }
 
     public function filterSupplier(int $supplierId): static
@@ -37,14 +42,30 @@ final class ProductBuilder extends Builder
         );
     }
 
+    public function filterTag(string $tag): static
+    {
+        return $this->when(
+            $tag !== '',
+            fn (Builder $query): Builder => $query->whereHas(
+                'tags',
+                fn (Builder $tagQuery): Builder => $tagQuery->where('name', $tag)
+        ));
+    }
+
     public function addSelectLastReviewAt(): static
     {
         return $this->addSelect([
             'last_review_at' => ProductReview::query()
-                ->select('created_at')
-                ->whereColumn('product_id', 'products.id')
-                ->whereNotNull('approved_at')
-                ->latest()
+                ->addLastReviewAtForProduct()
+                ->limit(1),
+            ]);
+    }
+
+    public function addLowestSupplierPrice(): static
+    {
+        return $this->addSelect([
+            'lowest_supplier_price' => ProductSupplier::query()
+                ->addLowestSupplierPriceForProduct()
                 ->limit(1),
             ]);
     }

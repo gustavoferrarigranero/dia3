@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Builders\ProductSupplierBuilder;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class ProductSupplier extends Pivot
@@ -16,5 +17,10 @@ class ProductSupplier extends Pivot
             'is_preferred' => 'boolean',
             'is_active' => 'boolean',
         ];
+    }
+
+    public function newEloquentBuilder($query): ProductSupplierBuilder
+    {
+        return new ProductSupplierBuilder($query);
     }
 }

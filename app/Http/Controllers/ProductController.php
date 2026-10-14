@@ -30,12 +30,19 @@ class ProductController extends Controller
 
         return Product::query()
             ->with($includes)
-
-            ->filterName($search)
-            ->filterDescription($search)
-
+            ->where(function ($query) use ($search) {
+                return $query->filterName($search)
+                    ->filterDescription($search);
+            })
+            ->filterCategory($categoryId)
+            ->filterSupplier($supplierId)
+            ->filterTag($tag)
             ->addSelectLastReviewAt()
-
+            ->addLowestSupplierPrice()
+            ->orderByDesc(
+                ProductReview::query()->addOrderByLastReviewAtForProduct()
+            )
+            ->orderByDesc('products.id')
             ->paginate($perPage)
             ->withQueryString();
     }
