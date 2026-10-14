@@ -1,0 +1,22 @@
+<?php
+
+use App\Models\Product;
+
+$products = Product::query()
+    ->active()
+    ->published()
+    ->inStock()
+    ->search('notebook')
+    ->priceBetween(500, 2000)
+    ->inCategory(1)
+    ->taggedWith('premium', 'mais-vendido')
+    ->availableFrom(1)
+    ->get();
+
+$productsWithMetrics = Product::query()
+    ->withCatalogMetrics()
+    ->get();
+
+$productsByLatestReview = Product::query()
+    ->orderByLatestReview()
+    ->get();
