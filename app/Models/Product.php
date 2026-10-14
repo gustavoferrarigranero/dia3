@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Builders\ProductBuilder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -65,8 +66,8 @@ class Product extends Model
         return $this->hasMany(ProductReview::class);
     }
 
-    //    public function newEloquentBuilder($query): ProductBuilder
-    //    {
-    //        return new ProductBuilder($query);
-    //    }
+    public function newEloquentBuilder($query): ProductBuilder
+    {
+        return new ProductBuilder($query);
+    }
 }
